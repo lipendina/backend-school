@@ -14,7 +14,7 @@ class Application(object):
         @app.route('/imports', methods=['POST'])
         def add_citizen():
             get_data = json.loads(request.data)
-            if helper.validation(get_data):
+            if helper.validation(get_data, True):
                 return Response(json.dumps('Error', indent=2, ensure_ascii=False), status=400,
                                 content_type='application/json')
 
