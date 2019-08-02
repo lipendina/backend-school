@@ -16,7 +16,7 @@ class Database(object):
         cursor.execute('''CREATE TABLE citizens (
                            id INTEGER PRIMARY KEY AUTOINCREMENT,
                            import_id INTEGER,
-                           citizens_id INTEGER,
+                           citizen_id INTEGER,
                            town TEXT,
                            street TEXT,
                            building TEXT,
@@ -24,14 +24,15 @@ class Database(object):
                            name TEXT,
                            birth_date TEXT,
                            gender TEXT
-                           );
-                           
-                           CREATE TABLE relatives (
+                           )
+                           ''')
+
+        cursor.execute('''CREATE TABLE relatives (
                            id INTEGER PRIMARY KEY AUTOINCREMENT,
                            import_id INTEGER,
                            citizen_id INTEGER,
                            relative_id INTEGER
-                           );
+                           )
                         ''')
 
     def __connect_database(self):
@@ -50,6 +51,14 @@ class Database(object):
     def execute_query(self, query):
         cursor, connect = self.__connect_database()
         cursor.execute(query)
+        data = cursor.fetchall()
+        cursor.close()
+        connect.close()
+        return data
+
+    def execute_many(self, query, data):
+        cursor, connect = self.__connect_database()
+        cursor.executemany(query, data)
         data = cursor.fetchall()
         cursor.close()
         connect.close()

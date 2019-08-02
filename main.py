@@ -14,12 +14,32 @@ class Application(object):
         @app.route('/imports', methods=['POST'])
         def add_citizen():
             get_data = json.loads(request.data)
-            import_id = self.db.execute_query('your query') + 1
-            # check citizens
-            # insert database
-            return_data = {
+            if helper.validation(get_data):
+                return Response(json.dumps('Error', indent=2, ensure_ascii=False), status=400,
+                                content_type='application/json')
 
+            query = 'SELECT MAX(import_id) from citizens'
+            import_id = self.db.execute_query(query)[0][0] + 1
+            data_citizens = []
+            data_relatives = []
+            for citizen in get_data['citizens']:
+                data_citizens.append((import_id, citizen['citizen_id'], citizen['town'], citizen['street'],
+                                      citizen['building'], citizen['apartment'], citizen['name'],
+                                      citizen['birth_date'], citizen['gender']))
+                for i in citizen['relatives']:
+                    data_relatives.append((import_id, citizen['citizen_id'], i))
+
+            add_to_citizens = 'INSERT INTO citizens (import_id, citizen_id, town, street, building, apartment,' \
+                              'name, birth_date, gender) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+            self.db.execute_many(add_to_citizens, data_citizens)
+            add_to_relatives = 'INSERT INTO relatives (import_id, citizen_id, relative_id) VALUES (?, ?, ?)'
+            self.db.execute_many(add_to_relatives, data_relatives)
+            return_data = {
+                'data': {
+                    'import_id': import_id
+                }
             }
+
             return Response(json.dumps(return_data, indent=2), status=201, content_type='application/json')
 
         @app.route('/imports/<import_id>/citizens/<citizen_id>', methods=['PUT'])
@@ -31,7 +51,7 @@ class Application(object):
 
         @app.route('/imports/<import_id>/citizens', methods=['GET'])
         def all_citizens(import_id):
-            query1 = 'SELECT citizens_id, town, street, building, apartment, name, ' \
+            query1 = 'SELECT citizen_id, town, street, building, apartment, name, ' \
                     'birth_date, gender FROM citizens WHERE import_id = {}'.format(import_id)
             result1 = self.db.execute_query(query1)
             dct = {}
@@ -52,7 +72,7 @@ class Application(object):
         @app.route('/imports/<import_id>/citizens/birthdays', methods=['GET'])
         def by_gifts(import_id):
             query = 'SELECT relatives.citizen_id, relatives.relative_id, citizens.birth_date ' \
-                    'FROM relatives, citizens WHERE relatives.relative_id = citizens.citizens_id ' \
+                    'FROM relatives, citizens WHERE relatives.relative_id = citizens.citizen_id ' \
                     'AND citizens.import_id = {}'.format(import_id)
             result = self.db.execute_query(query)
 
