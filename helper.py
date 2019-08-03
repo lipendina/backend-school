@@ -1,6 +1,19 @@
 from collections import defaultdict
 
 
+fields = {
+    'citizen_id': int,
+    'town': str,
+    'street': str,
+    'building': str,
+    'apartment': int,
+    'name': str,
+    'birth_date': str,
+    'gender': str,
+    'relatives': list
+}
+
+
 def tuple_to_dict(tup):
     return {
         'citizen_id': tup[0],
@@ -15,19 +28,7 @@ def tuple_to_dict(tup):
     }
 
 
-def validation(get_data):
-    fields = {
-        'citizen_id': int,
-        'town': str,
-        'street': str,
-        'building': str,
-        'apartment': int,
-        'name': str,
-        'birth_date': str,
-        'gender': str,
-        'relatives': list
-    }
-
+def validation_import(get_data):
     for i in get_data['citizens']:
         if len(i.keys()) != len(fields.keys()):
             return True
@@ -44,4 +45,16 @@ def validation(get_data):
         for relative in relatives:
             if citizen not in dct[relative]:
                 return True
+
+
+def validation_update(get_data):
+    for key, value in get_data.items():
+        if key not in fields.keys():
+            return True
+        if type(value) != fields[key]:
+            return True
+
+
+
+
 
