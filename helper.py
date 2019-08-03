@@ -15,7 +15,7 @@ def tuple_to_dict(tup):
     }
 
 
-def validation(get_data, is_import):
+def validation(get_data):
     fields = {
         'citizen_id': int,
         'town': str,
@@ -29,7 +29,7 @@ def validation(get_data, is_import):
     }
 
     for i in get_data['citizens']:
-        if is_import and len(i.keys()) != len(fields.keys()):
+        if len(i.keys()) != len(fields.keys()):
             return True
         for key, value in i.items():
             if key not in fields.keys():

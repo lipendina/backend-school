@@ -14,7 +14,7 @@ class Application(object):
         @app.route('/imports', methods=['POST'])
         def add_citizen():
             get_data = json.loads(request.data)
-            if helper.validation(get_data, True):
+            if helper.validation(get_data):
                 return Response(json.dumps('Error', indent=2, ensure_ascii=False), status=400,
                                 content_type='application/json')
 
@@ -44,6 +44,18 @@ class Application(object):
 
         @app.route('/imports/<import_id>/citizens/<citizen_id>', methods=['PUT'])
         def update_citizen(import_id, citizen_id):
+            query1 = 'SELECT name, gender, birth_date, town, street, building, apartment FROM citizens WHERE ' \
+                    'import_id={} AND citizen_id={}'.format(import_id, citizen_id)
+            query2 = 'SELECT relative_id FROM relatives WHERE import_id={} AND citizen_id={}'.format(import_id,
+                                                                                                     citizen_id)
+            result1 = self.db.execute_query(query1)
+            result2 = self.db.execute_query(query2)
+            relatives = []
+            for i in query2:
+                relatives.append(i)
+            data = {}
+
+
             return_data = {
                 'data': '/imports/{}/citizens/{}'.format(import_id, citizen_id)
             }
