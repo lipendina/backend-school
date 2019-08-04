@@ -55,6 +55,19 @@ def validation_update(get_data):
             return True
 
 
+def dict_to_string(dct):
+    st = []
+    for key, value in dct.items():
+        if key == 'relatives':
+            continue
+        if type(value) is int:
+            st.append('='.join([key, value]))
+        elif type(value) is str:
+            st.append('{}="{}"'.format(key, value))
+    return ', '.join(st)
+
+
+
 
 
 

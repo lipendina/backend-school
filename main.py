@@ -48,9 +48,37 @@ class Application(object):
             if helper.validation_update(get_data):
                 return Response(json.dumps('Error', indent=2, ensure_ascii=False), status=400,
                                 content_type='application/json')
+            if 'relatives' in get_data.keys():
+                del_query = 'DELETE FROM relatives WHERE import_id={} AND (citizen_id={} OR relative_id={})'.format(
+                    import_id, citizen_id, citizen_id
+                )
+                self.db.execute_query(del_query)
+                data = []
+                for citizen in get_data['relatives']:
+                    data.append((import_id, citizen_id, citizen))
+                    data.append((import_id, citizen, citizen_id))
+                insert_query = 'INSERT INTO relatives (import_id, citizen_id, relative_id) VALUES (?, ?, ?)'
+                self.db.execute_many(insert_query, data)
+
+            update_query = 'UPDATE citizens SET {} WHERE import_id={} AND citizen_id={}'.format(
+                helper.dict_to_string(get_data), import_id, citizen_id
+            )
+            self.db.execute_query(update_query)
+            select_query1 = 'SELECT citizen_id, town, street, building, apartment, name, birth_date, gender FROM ' \
+                            'citizens WHERE import_id={} AND citizen_id={}'.format(import_id, citizen_id)
+            result1 = self.db.execute_query(select_query1)
+            dct = {}
+            for i in result1:
+                dct[i[0]] = helper.tuple_to_dict(i)
+            select_query2 = 'SELECT relative_id FROM relatives WHERE import_id={} AND citizen_id={}'.format(
+                import_id, citizen_id
+            )
+            result2 = self.db.execute_query(select_query2)
+            for i in result2:
+                dct[int(citizen_id)]['relatives'].append(i[0])
 
             return_data = {
-                'data': '/imports/{}/citizens/{}'.format(import_id, citizen_id)
+                'data': [i for i in dct.values()]
             }
             return Response(json.dumps(return_data, indent=2), status=200, content_type='application/json')
 
