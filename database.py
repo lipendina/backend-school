@@ -34,6 +34,10 @@ class Database(object):
                            relative_id INTEGER
                            )
                         ''')
+        cursor.execute('''CREATE TABLE current_id(
+                            id INT PRIMARY KEY
+                           )
+                        ''')
 
     def __connect_database(self):
         is_ok = False
