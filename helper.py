@@ -45,6 +45,7 @@ def validation_import(get_data):
         for relative in relatives:
             if citizen not in dct[relative]:
                 return True
+    return False
 
 
 def validation_update(get_data):
@@ -53,6 +54,7 @@ def validation_update(get_data):
             return True
         if type(value) != fields[key]:
             return True
+    return False
 
 
 def dict_to_string(dct):
@@ -61,7 +63,7 @@ def dict_to_string(dct):
         if key == 'relatives':
             continue
         if type(value) is int:
-            st.append('='.join([key, value]))
+            st.append('='.join([key, str(value)]))
         elif type(value) is str:
             st.append('{}="{}"'.format(key, value))
     return ', '.join(st)
