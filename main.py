@@ -42,7 +42,7 @@ class Application(object):
 
             return Response(json.dumps(return_data, indent=2), status=201, content_type='application/json')
 
-        @app.route('/imports/<import_id>/citizens/<citizen_id>', methods=['PUT'])
+        @app.route('/imports/<import_id>/citizens/<citizen_id>', methods=['PATCH'])
         def update_citizen(import_id, citizen_id):
             get_data = json.loads(request.data)
             if helper.validation_update(get_data):
