@@ -1,4 +1,5 @@
 from collections import defaultdict
+from datetime import datetime
 
 
 fields = {
@@ -28,6 +29,14 @@ def tuple_to_dict(tup):
     }
 
 
+def validation_date(citizen):
+    try:
+        datetime.strptime(citizen['birth_date'], '%d.%m.%Y')
+    except (ValueError, TypeError):
+        return True
+    return False
+
+
 def validation_import(get_data):
     for i in get_data['citizens']:
         if len(i.keys()) != len(fields.keys()):
@@ -37,10 +46,13 @@ def validation_import(get_data):
                 return True
             if type(value) != fields[key]:
                 return True
+        if validation_date(i):
+            return True
+        if i['gender'] != 'male' and i['gender'] != 'female':
+            return True
     dct = defaultdict(list)
     for i in get_data['citizens']:
         dct[i['citizen_id']] = i['relatives']
-
     for citizen, relatives in dct.items():
         for relative in relatives:
             if citizen not in dct[relative]:
@@ -53,6 +65,12 @@ def validation_update(get_data):
         if key not in fields.keys():
             return True
         if type(value) != fields[key]:
+            return True
+    if 'birth_date' in get_data.keys():
+        if validation_date(get_data):
+            return True
+    if 'gender' in get_data.keys():
+        if get_data['gender'] != 'male' and get_data['gender'] != 'female':
             return True
     return False
 

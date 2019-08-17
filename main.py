@@ -60,10 +60,12 @@ class Application(object):
                 insert_query = 'INSERT INTO relatives (import_id, citizen_id, relative_id) VALUES (?, ?, ?)'
                 self.db.execute_many(insert_query, data)
 
-            update_query = 'UPDATE citizens SET {} WHERE import_id={} AND citizen_id={}'.format(
-                helper.dict_to_string(get_data), import_id, citizen_id
-            )
-            self.db.execute_query(update_query)
+            str_dict = helper.dict_to_string(get_data)
+            if str_dict != '':
+                update_query = 'UPDATE citizens SET {} WHERE import_id={} AND citizen_id={}'.format(
+                    str_dict, import_id, citizen_id
+                )
+                self.db.execute_query(update_query)
             select_query1 = 'SELECT citizen_id, town, street, building, apartment, name, birth_date, gender FROM ' \
                             'citizens WHERE import_id={} AND citizen_id={}'.format(import_id, citizen_id)
             result1 = self.db.execute_query(select_query1)
@@ -78,7 +80,7 @@ class Application(object):
                 dct[int(citizen_id)]['relatives'].append(i[0])
 
             return_data = {
-                'data': [i for i in dct.values()]
+                'data': [i for i in dct.values()][0]
             }
             return Response(json.dumps(return_data, indent=2), status=200, content_type='application/json')
 
@@ -104,9 +106,10 @@ class Application(object):
 
         @app.route('/imports/<import_id>/citizens/birthdays', methods=['GET'])
         def by_gifts(import_id):
-            query = 'SELECT relatives.citizen_id, relatives.relative_id, citizens.birth_date ' \
-                    'FROM relatives, citizens WHERE relatives.relative_id = citizens.citizen_id ' \
-                    'AND citizens.import_id = {}'.format(import_id)
+            query = 'SELECT DISTINCT relatives.citizen_id, relatives.relative_id, citizens.birth_date ' \
+                    'FROM citizens INNER JOIN relatives ' \
+                    'ON citizens.citizen_id = relatives.relative_id ' \
+                    'AND citizens.import_id = {} AND relatives.import_id = {}'.format(import_id, import_id)
             result = self.db.execute_query(query)
 
             dct = {}
@@ -147,9 +150,9 @@ class Application(object):
 
             data = []
             for key, value in dct.items():
-                data.append({'town': key, 'p50': int(numpy.percentile(value, 50, interpolation='linear')),
-                             'p75': int(numpy.percentile(value, 75, interpolation='linear')),
-                             'p99': int(numpy.percentile(value, 99, interpolation='linear'))})
+                data.append({'town': key, 'p50': numpy.percentile(value, 50, interpolation='linear'),
+                             'p75': numpy.percentile(value, 75, interpolation='linear'),
+                             'p99': numpy.percentile(value, 99, interpolation='linear')})
 
             return_data = {
                 'data': data
@@ -158,15 +161,15 @@ class Application(object):
             return Response(json.dumps(return_data, indent=2, ensure_ascii=False), status=200,
                             content_type='application/json')
 
-    def __init__(self):
+    def __init__(self, dataname):
         self.app = Flask(__name__)
         self.init_http_server()
-        self.db = database.Database('sqlite.db')
+        self.db = database.Database(dataname)
 
     def run(self):
         self.app.run(host='localhost', port=8080)
 
 
 if __name__ == '__main__':
-    server = Application()
+    server = Application('sqlite.db')
     server.run()
