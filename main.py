@@ -152,7 +152,7 @@ class Application(object):
 
             data = []
             for key, value in dct.items():
-                pxx = numpy.percentile(value, [60, 75, 99], interpolation='linear')
+                pxx = numpy.percentile(value, [50, 75, 99], interpolation='linear')
                 data.append({'town': key,
                              'p50': round(pxx[0], 2),
                              'p75': round(pxx[1], 2),
