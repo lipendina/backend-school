@@ -13,7 +13,7 @@ class Application(object):
 
         @app.route('/imports', methods=['POST'])
         def add_citizen():
-            get_data = json.loads(request.data.encode())
+            get_data = json.loads(request.data.decode())
             if helper.validation_import(get_data):
                 return Response(json.dumps('Error', indent=2, ensure_ascii=False), status=400,
                                 content_type='application/json')
@@ -47,7 +47,7 @@ class Application(object):
 
         @app.route('/imports/<import_id>/citizens/<citizen_id>', methods=['PATCH'])
         def update_citizen(import_id, citizen_id):
-            get_data = json.loads(request.data.encode())
+            get_data = json.loads(request.data.decode())
             if helper.validation_update(get_data):
                 return Response(json.dumps('Error', indent=2, ensure_ascii=False), status=400,
                                 content_type='application/json')
