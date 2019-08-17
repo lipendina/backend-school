@@ -7,12 +7,12 @@ class Database(object):
     def __init__(self, dataname):
         self.dataname = dataname
         if not os.path.isfile(self.dataname):
-            cursor, connect = self.__connect_database()
-            self.__create_tables(cursor)
+            cursor, connect = self._connect_database()
+            self._create_tables(cursor)
             cursor.close()
             connect.close()
 
-    def __create_tables(self, cursor):
+    def _create_tables(self, cursor):
         cursor.execute('''CREATE TABLE citizens (
                            id INTEGER PRIMARY KEY AUTOINCREMENT,
                            import_id INTEGER,
@@ -39,7 +39,7 @@ class Database(object):
                            )
                         ''')
 
-    def __connect_database(self):
+    def _connect_database(self):
         is_ok = False
         try:
             con = sqlite3.connect(self.dataname, isolation_level=None)
@@ -53,7 +53,7 @@ class Database(object):
             exit(0)
 
     def execute_query(self, query):
-        cursor, connect = self.__connect_database()
+        cursor, connect = self._connect_database()
         cursor.execute(query)
         data = cursor.fetchall()
         cursor.close()
@@ -61,7 +61,7 @@ class Database(object):
         return data
 
     def execute_many(self, query, data):
-        cursor, connect = self.__connect_database()
+        cursor, connect = self._connect_database()
         cursor.executemany(query, data)
         data = cursor.fetchall()
         cursor.close()

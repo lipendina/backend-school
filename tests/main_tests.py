@@ -7,6 +7,7 @@ import os
 path = os.path.abspath(__file__).split('\\')
 sys.path.append('\\'.join(path[:-2]))
 from main import Application
+from time import sleep
 
 app = Application('testbase.db')
 
@@ -20,7 +21,8 @@ class TestMain(unittest.TestCase):
     def setUpClass(cls):
         cls.thr = multiprocessing.Process(target=run_app)
         cls.thr.start()
-
+        sleep(3)
+        
         data = {
             (1, 1, 'Волгоград', 'ул. Рокоссовского', '52а', 113, 'Иванов Иван', '10.10.2000', 'male'),
             (1, 2, 'Волжский', 'пл. Труда', '17', 112, 'Белек', '15.02.1990', 'female'),

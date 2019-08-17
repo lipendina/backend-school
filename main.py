@@ -13,13 +13,16 @@ class Application(object):
 
         @app.route('/imports', methods=['POST'])
         def add_citizen():
-            get_data = json.loads(request.data)
+            get_data = json.loads(request.data.encode())
             if helper.validation_import(get_data):
                 return Response(json.dumps('Error', indent=2, ensure_ascii=False), status=400,
                                 content_type='application/json')
 
             query = 'SELECT MAX(import_id) from citizens'
-            import_id = self.db.execute_query(query)[0][0] + 1
+            request_id = self.db.execute_query(query)[0][0]
+            if not request_id:
+                request_id = 0
+            import_id = request_id + 1
             data_citizens = []
             data_relatives = []
             for citizen in get_data['citizens']:
@@ -44,7 +47,7 @@ class Application(object):
 
         @app.route('/imports/<import_id>/citizens/<citizen_id>', methods=['PATCH'])
         def update_citizen(import_id, citizen_id):
-            get_data = json.loads(request.data)
+            get_data = json.loads(request.data.encode())
             if helper.validation_update(get_data):
                 return Response(json.dumps('Error', indent=2, ensure_ascii=False), status=400,
                                 content_type='application/json')
@@ -141,18 +144,19 @@ class Application(object):
             for i in result:
                 birth_date = datetime.strptime(i[1], '%d.%m.%Y')
                 now = datetime.now().date()
-                if (now.month, now.day) > (birth_date.month, birth_date.day):
-                    age = now.year - birth_date.year
-                else:
-                    age = now.year - birth_date.year - 1
+                age = now.year - birth_date.year
+                if now.month < birth_date.month or now.month == birth_date.month and now.day < birth_date.day:
+                    age -= 1
 
                 dct[i[0]].append(age)
 
             data = []
             for key, value in dct.items():
-                data.append({'town': key, 'p50': numpy.percentile(value, 50, interpolation='linear'),
-                             'p75': numpy.percentile(value, 75, interpolation='linear'),
-                             'p99': numpy.percentile(value, 99, interpolation='linear')})
+                pxx = numpy.percentile(value, [60, 75, 99], interpolation='linear')
+                data.append({'town': key,
+                             'p50': round(pxx[0], 2),
+                             'p75': round(pxx[1], 2),
+                             'p99': round(pxx[2], 2)})
 
             return_data = {
                 'data': data
