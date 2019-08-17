@@ -167,7 +167,7 @@ class Application(object):
         self.db = database.Database(dataname)
 
     def run(self):
-        self.app.run(host='localhost', port=8080)
+        self.app.run(host='0.0.0.0', port=8080)
 
 
 if __name__ == '__main__':
