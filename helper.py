@@ -32,10 +32,11 @@ def tuple_to_dict(tup):
 
 def validation_date(citizen):
     try:
-        datetime.strptime(citizen['birth_date'], '%d.%m.%Y')
+        birth_date = datetime.strptime(citizen['birth_date'], '%d.%m.%Y')
     except (ValueError, TypeError):
         return True
-    return False
+    cur_date = datetime.today()
+    return birth_date > cur_date
 
 
 def validation_import(get_data):
@@ -50,6 +51,8 @@ def validation_import(get_data):
         if validation_date(i):
             return True
         if i['gender'] != 'male' and i['gender'] != 'female':
+            return True
+        if i['apartment'] <= 0:
             return True
     dct = defaultdict(list)
     for i in get_data['citizens']:
@@ -72,6 +75,9 @@ def validation_update(get_data):
             return True
     if 'gender' in get_data.keys():
         if get_data['gender'] != 'male' and get_data['gender'] != 'female':
+            return True
+    if 'apartment' in get_data.keys():
+        if get_data['apartment'] <= 0:
             return True
     return False
 
