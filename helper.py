@@ -36,7 +36,7 @@ def validation_date(citizen):
     except (ValueError, TypeError):
         return True
     cur_date = datetime.today()
-    return birth_date > cur_date
+    return birth_date >= cur_date
 
 
 def validation_import(get_data):
