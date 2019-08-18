@@ -1,3 +1,4 @@
+import math
 from collections import defaultdict
 from datetime import datetime
 
@@ -87,7 +88,19 @@ def dict_to_string(dct):
     return ', '.join(st)
 
 
-
-
-
+def percentile(arr, percents):
+    if not arr:
+        return
+    answ = []
+    arr.sort()
+    for percent in percents:
+        val_k = ((len(arr) - 1) * percent) / 100
+        val_cl = math.ceil(val_k)
+        val_fl = math.floor(val_k)
+        if val_cl == val_fl:
+            answ.append(arr[int(val_k)])
+        else:
+            left, right = arr[int(val_fl)] * (val_cl - val_k), arr[int(val_cl)] * (val_k - val_fl)
+            answ.append(left + right)
+    return answ
 
