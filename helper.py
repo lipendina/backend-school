@@ -32,10 +32,10 @@ def tuple_to_dict(tup):
 
 def validation_date(citizen):
     try:
-        birth_date = datetime.strptime(citizen['birth_date'], '%d.%m.%Y')
+        birth_date = datetime.date(datetime.strptime(citizen['birth_date'], '%d.%m.%Y'))
     except (ValueError, TypeError):
         return True
-    cur_date = datetime.today()
+    cur_date = datetime.date(datetime.today())
     return birth_date >= cur_date
 
 
